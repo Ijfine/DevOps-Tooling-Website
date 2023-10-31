@@ -48,7 +48,7 @@ For this project, you need to have your 3-Tier web application architecture with
     ```python
     'sudo gdisk /dev/xvdf'
     ```
-    ![Alt text](ngdisk.png)
+    ![Alt text](Images/ngdisk.png)
 
     6. To view the newly configured partition on each 3 disks, run this command:
 
