@@ -39,50 +39,50 @@ For this project, you need to have your 3-Tier web application architecture with
     4. Connect your Web Server EC2 instance to your terminal through SSH.
     To check which block devices are attached to the server, use the below command:
     ```python
-    'lsblk'
+    lsblk
     ```
     ![Alt text](Images/nls.png)
 
     5. Use gdisk utility to create single partition on each of the 3 disks. Type in this command:
 
     ```python
-    'sudo gdisk /dev/xvdf'
+    sudo gdisk /dev/xvdf
     ```
     ![Alt text](Images/ngdisk.png)
 
     6. To view the newly configured partition on each 3 disks, run this command:
 
     ```python
-    'lsblk'
+    lsblk
     ```
     ![Alt text](Images/npart.png)
 
     7. Install `lvm2` package using this command:
     ```python
-    'sudo yum install lvm2'
+    sudo yum install lvm2
     ```
     ![Alt text](Images/nlvm.png)
 
     8. To mark each of the 3 disks as physical volumes (PVs) to be used by LVM, use `pvcreate` utility by running the below command respectively:
 
     ```python
-    'sudo pvcreate /dev/xvdf1'
-    'sudo pvcreate /dev/xvdg1'
-    'sudo pvcreate /dev/xvdh1'
+    sudo pvcreate /dev/xvdf1
+    sudo pvcreate /dev/xvdg1
+    sudo pvcreate /dev/xvdh1
     ```
     ![Alt text](Images/npv.png)
 
     9. Verify that yoyr Physical volume has been created successfully by running:
 
     ```python
-    'sudo pvs'
+    sudo pvs
     ```
     ![Alt text](Images/npvs.png)
 
     10. Use `vgcreate` utility to add all 3 PVs to a volume group (VG) and call it *webdata-vg*. Type in the below command:
 
     ```python
-    'sudo vgcreate webdata-vg /dev/xvdh1 /dev/xvdg1 /dev/xvdf1'
+    sudo vgcreate webdata-vg /dev/xvdh1 /dev/xvdg1 /dev/xvdf1
     ```
     Verify it by running `sudo vgs`
 
@@ -91,9 +91,9 @@ For this project, you need to have your 3-Tier web application architecture with
     11. Create 3 logical volumes using `lvcreate` utility. Name them **lv-opt**, **lv-apps** and **lv-logs**. Type in the below command respectively:
 
     ```python
-    'sudo lvcreate -n lv-opt -L 9G webdata-vg'
-    'sudo lvcreate -n lv-apps -L 9G webdata-vg'
-    'sudo lvcreate -n lv-logs -L 9G webdata-vg'
+    sudo lvcreate -n lv-opt -L 9G webdata-vg
+    sudo lvcreate -n lv-apps -L 9G webdata-vg
+    sudo lvcreate -n lv-logs -L 9G webdata-vg
     ```
     Verify it by running `sudo lvs`
 
@@ -102,9 +102,9 @@ For this project, you need to have your 3-Tier web application architecture with
     12. Use the below command to format logical volumes with *xfs* filesystem one at a time.
 
     ```python
-    'sudo mkfs -t xfs /dev/webdata-vg/lv-apps'
-    'sudo mkfs -t xfs /dev/webdata-vg/lv-logs'
-    'sudo mkfs -t xfs /dev/webdata-vg/lv-opt'
+    sudo mkfs -t xfs /dev/webdata-vg/lv-apps
+    sudo mkfs -t xfs /dev/webdata-vg/lv-logs
+    sudo mkfs -t xfs /dev/webdata-vg/lv-opt
     ```
     ![Alt text](Images/nxfs.png)
 
@@ -116,16 +116,16 @@ For this project, you need to have your 3-Tier web application architecture with
     Run the below command:
 
     ```python
-    'sudo mkdir /mnt/apps'
-    'sudo mkdir /mnt/logs'
-    'sudo mkdir /mnt/opt'
+    sudo mkdir /mnt/apps
+    sudo mkdir /mnt/logs
+    sudo mkdir /mnt/opt
     ``` 
     Then run:
 
     ```python
-    'sudo mount /dev/webdata-vg/lv-apps /mnt/apps'
-    'sudo mount /dev/webdata-vg/lv-logs /mnt/logs'
-    'sudo mount /dev/webdata-vg/lv-opt /mnt/opt'
+    sudo mount /dev/webdata-vg/lv-apps /mnt/apps
+    sudo mount /dev/webdata-vg/lv-logs /mnt/logs
+    sudo mount /dev/webdata-vg/lv-opt /mnt/opt
     ```
 
     ![Alt text](Images/ndir.png)
@@ -133,11 +133,11 @@ For this project, you need to have your 3-Tier web application architecture with
     14. Install NFS server, configure it to start on reboot and ensure it is running. Type in the below command one after another:
 
     ```python
-    'sudo yum -y update'
-    'sudo yum install nfs-utils -y'
-    'sudo systemctl start nfs-server.service'
-    'sudo systemctl enable nfs-server.service'
-    'sudo systemctl status nfs-server.service'
+    sudo yum -y update
+    sudo yum install nfs-utils -y
+    sudo systemctl start nfs-server.service
+    sudo systemctl enable nfs-server.service
+    sudo systemctl status nfs-server.service
     ```
     ![Alt text](Images/nfsins.png)
     ![Alt text](Images/nfssys.png)
@@ -151,50 +151,50 @@ For this project, you need to have your 3-Tier web application architecture with
     16. Set up permission that will allow our webservers to read, write and execute files on NFS. Run the below command respectively:
 
     ```python
-    'sudo chown -R nobody: /mnt/apps'
-    'sudo chown -R nobody: /mnt/logs'
-    'sudo chown -R nobody: /mnt/opt'
+    sudo chown -R nobody: /mnt/apps
+    sudo chown -R nobody: /mnt/logs
+    sudo chown -R nobody: /mnt/opt
     ```
 
     Next, run;
 
     ```python
-    'sudo chmod -R 777 /mnt/apps'
-    'sudo chmod -R 777 /mnt/logs'
-    'sudo chmod -R 777 /mnt/opt'
+    sudo chmod -R 777 /mnt/apps
+    sudo chmod -R 777 /mnt/logs
+    sudo chmod -R 777 /mnt/opt
     ```
 
     Then;
 
     ```python
-    'sudo systemctl restart nfs-server.service'
+    sudo systemctl restart nfs-server.service
     ```
 
     17. Configure access to NFS for clients within the same subnet. Open /etc/exports director with a text editor, type:
 
     ```python
-    'sudo vi /etc/exports'
+    sudo vi /etc/exports
     ```
     Paste the below inside the file
 
     ```python
-    '/mnt/apps <Subnet-CIDR>(rw,sync,no_all_squash,no_root_squash)'
-    '/mnt/logs <Subnet-CIDR>(rw,sync,no_all_squash,no_root_squash)'
-    '/mnt/opt <Subnet-CIDR>(rw,sync,no_all_squash,no_root_squash)'
+    /mnt/apps <Subnet-CIDR>(rw,sync,no_all_squash,no_root_squash)
+    /mnt/logs <Subnet-CIDR>(rw,sync,no_all_squash,no_root_squash)
+    /mnt/opt <Subnet-CIDR>(rw,sync,no_all_squash,no_root_squash)
     ```
     Save and close the file
 
     18. Export all the directories using the below command:
     
     ```python
-    'sudo exportfs -arv'
+    sudo exportfs -arv
     ```
     ![Alt text](Images/nexport.png)
 
     19. Check which port is used by NFS, run:
 
     ```python
-    'rpcinfo -p | grep nfs'
+    rpcinfo -p | grep nfs
     ```
     ![Alt text](Images/ngrep.png)
 
@@ -211,31 +211,31 @@ For this project, you need to have your 3-Tier web application architecture with
     2. Install MySQL server using this command:
 
     ```python
-    'sudo apt install mysql-server -y'
+    sudo apt install mysql-server -y
     ```
     ![Alt text](Images/dmysql.png)
 
     3. log into Mysql console by typing -
 
     ```python
-    'sudo mysql'
+    sudo mysql
     ```
     4. Create a database and call it `tooling`
 
     ```python
-    'create database tooling;'
+    create database tooling;
     ```
 
     5. Create user called 'webaccess' and set a password for the user by typing:
 
     ```python
-    'create user 'webaccess'@'nfs subnet cidr' identified by     'your chosen password';'
+    create user 'webaccess'@'nfs subnet cidr' identified by     'your chosen password';
     ```
 
     6. Grant permission to webaccess user on tooling database to do anything only from the webservers subnet cidr. run:
 
     ```python
-    'grant all privileges to tooling.* to 'webaccess'@'nfs subnet cidr';'
+    grant all privileges to tooling.* to 'webaccess'@'nfs subnet cidr';
     ```
 
     7. Followed by `flush privileges` command.
@@ -253,15 +253,15 @@ For this project, you need to have your 3-Tier web application architecture with
     2. Install NFS client using this command:
 
     ```python
-    'sudo yum install nfs-utils nfs4-acl-tools -y'
+    sudo yum install nfs-utils nfs4-acl-tools -y
     ```
     ![Alt text](Images/web1nfs.png)
 
     3. Create /var/www directory and mount it targeting NFS servers' export for apps
 
     ```python
-    'sudo mkdir /var/www'
-    'sudo mount -t nfs -o rw,nosuid <NFS-Server-Private-IP-Address>:/mnt/apps /var/www'
+    sudo mkdir /var/www
+    sudo mount -t nfs -o rw,nosuid <NFS-Server-Private-IP-Address>:/mnt/apps /var/www
     ```
 
     Use `df -h` command to verify.
@@ -271,7 +271,7 @@ For this project, you need to have your 3-Tier web application architecture with
     4. Make sure the changes persist on Web Server after reboot. Do the following:
 
     ```python
-    'sudo vi /etc/fstab'
+    sudo vi /etc/fstab
     ```
     and paste the below inside the file
 
@@ -284,17 +284,17 @@ For this project, you need to have your 3-Tier web application architecture with
     5. Install Remi's repository, Apache and PHP. Run the below command simultaneously:
 
    ```python
-    'sudo yum install httpd -y'
-    'sudo systemctl start httpd'
-    'sudo systemctl enable httpd'
-    'sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm'
-    'sudo dnf install dnf-utils http://rpms.remirepo.net/enterprise/remi-release-9.rpm'
-    'sudo dnf module reset php'
-    'sudo dnf module enable php:remi-7.4'
-    'sudo dnf install php php-opcache php-gd php-curl php-mysqlnd'
-    'sudo systemctl start php-fpm'
-    'sudo systemctl enable php-fpm'
-    'sudo setsebool -P httpd_execmem 1'
+    sudo yum install httpd -y
+    sudo systemctl start httpd
+    sudo systemctl enable httpd
+    sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    sudo dnf install dnf-utils http://rpms.remirepo.net/enterprise/remi-release-9.rpm
+    sudo dnf module reset php
+    sudo dnf module enable php:remi-7.4
+    sudo dnf install php php-opcache php-gd php-curl php-mysqlnd
+    sudo systemctl start php-fpm
+    sudo systemctl enable php-fpm
+    sudo setsebool -P httpd_execmem 1
    ```
     ![Alt text](Images/whttpd.png)
     ![Alt text](Images/whttpd2.png)
@@ -315,12 +315,12 @@ For this project, you need to have your 3-Tier web application architecture with
     7. Locate the log folder for Apache on the web server and mount it to NFS server's export for logs. Type this command:
 
     ```python
-    'sudo mount -t nfs -o rw,nosuid <NFS-Server-Private-IP-Address>:/mnt/logs /var/log/httpd'
+    sudo mount -t nfs -o rw,nosuid <NFS-Server-Private-IP-Address>:/mnt/logs /var/log/httpd
     ```
     8. Make sure the changes will persist after reboot. Run this command:
 
     ```python
-    'sudo vi /etc/fstab'
+    sudo vi /etc/fstab
     ```
 
     and paste the below inside the file
@@ -351,12 +351,12 @@ For this project, you need to have your 3-Tier web application architecture with
     12. To avoid 403 error, check permissions to your /var/www/html folder and also disable SELinux. Run:
 
     ```python
-    'sudo setenforce 0'
+    sudo setenforce 0
     ```
     13. To disable SELinux permanently, open the following config file
 
     ```python
-    'sudo vi /etc/sysconfig/selinux'
+    sudo vi /etc/sysconfig/selinux
     ```
     set `SELinux=disabled`
 
@@ -367,13 +367,13 @@ For this project, you need to have your 3-Tier web application architecture with
     14. Restart httpd, run:
 
     ````python
-    'sudo systemctl restart httpd'
+    sudo systemctl restart httpd
     ````
 
     15. Update the database configuration. Run this command:
 
     ```python
-    'sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf'
+    sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf
     ```
     Change the bind address to 0.0.0.0
 
@@ -384,13 +384,13 @@ For this project, you need to have your 3-Tier web application architecture with
     Restart mysql server using the below commnad:
 
     ```python
-    'sudo systemctl resatrt mysql'
+    sudo systemctl resatrt mysql
     ```
     
     16. Update the webserver's configuration to connect to the database in `/var/www/html/functions.php`file and type in the database, user and password you created on your database server. Run the below command:
 
     ```python
-    'sudo vi /var/www/html/functions.php'
+    sudo vi /var/www/html/functions.php
     ```
      ![Alt text](Images/wphp.png)
     After editing the file, save and close it.
@@ -398,7 +398,7 @@ For this project, you need to have your 3-Tier web application architecture with
     17. Apply `tooling-db.sql` script to your database. On your webserver, cd into tooling folder and then use this command:
 
     ```python
-    'mysql -h <database-private-ip> -u <db-username> -p <db-password> < tooling-db.sql'
+    mysql -h <database-private-ip> -u <db-username> -p <db-password> < tooling-db.sql
     ```
      
      Before you can carry out the above command, install mysql on your webserver using this command : `sudo yum install mysql`
